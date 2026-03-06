@@ -1,0 +1,13 @@
+# HTTP client for Upstage Document Parse REST API (replaces langchain-upstage)
+# langchain-upstage requires tokenizers<0.21.0, which has no pre-built wheel for Python 3.14
+requests>=2.31.0
+
+# Environment variable management
+python-dotenv>=1.0.0
+
+# CLI output formatting
+rich>=13.0.0
+
+# Testing
+pytest>=8.0.0
+pytest-mock>=3.12.0
