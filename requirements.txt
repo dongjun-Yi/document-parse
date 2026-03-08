@@ -8,6 +8,9 @@ python-dotenv>=1.0.0
 # CLI output formatting
 rich>=13.0.0
 
+# Open-source parser for benchmarking
+pymupdf>=1.24.0
+
 # Testing
 pytest>=8.0.0
 pytest-mock>=3.12.0

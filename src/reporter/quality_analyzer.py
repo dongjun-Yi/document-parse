@@ -73,6 +73,18 @@ class QualityReport:
         return self.figure_with_base64 / self.figure_total
 
 
+@dataclass
+class BenchmarkReport:
+    upstage: QualityReport
+    local: QualityReport
+
+    @property
+    def speed_up_factor(self) -> float:
+        if self.upstage.elapsed_seconds == 0:
+            return 0.0
+        return self.upstage.elapsed_seconds / self.local.elapsed_seconds
+
+
 def analyze(result: ParseResult) -> QualityReport:
     category_counts = dict(Counter(el.category for el in result.elements))
     total = result.total_element_count
@@ -104,6 +116,10 @@ def analyze(result: ParseResult) -> QualityReport:
         figure_total=len(figure_elements),
         figure_with_base64=figure_with_base64,
     )
+
+
+def compare(upstage_res: ParseResult, local_res: ParseResult) -> BenchmarkReport:
+    return BenchmarkReport(upstage=analyze(upstage_res), local=analyze(local_res))
 
 
 def _element_has_base64(element: ParsedElement) -> bool:
