@@ -7,10 +7,6 @@ from src.models.parse_result import ParseResult
 
 
 def save_as_json(result: ParseResult, output_dir: Path) -> Path:
-    """Save ParseResult as a structured JSON file.
-
-    Returns the path of the saved file.
-    """
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = Path(result.source_filename).stem
     output_path = output_dir / f"{stem}_result.json"
@@ -32,15 +28,13 @@ def save_as_json(result: ParseResult, output_dir: Path) -> Path:
         ],
     }
 
-    output_path.write_text(json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8")
+    output_path.write_text(
+        json.dumps(payload, ensure_ascii=False, indent=2), encoding="utf-8"
+    )
     return output_path
 
 
 def save_as_html(result: ParseResult, output_dir: Path) -> Path:
-    """Save the raw HTML output from the API to a standalone HTML file.
-
-    Returns the path of the saved file.
-    """
     output_dir.mkdir(parents=True, exist_ok=True)
     stem = Path(result.source_filename).stem
     output_path = output_dir / f"{stem}_raw.html"
@@ -54,4 +48,19 @@ def save_as_html(result: ParseResult, output_dir: Path) -> Path:
         "</body>\n</html>"
     )
     output_path.write_text(html_content, encoding="utf-8")
+    return output_path
+
+
+def save_as_markdown(result: ParseResult, output_dir: Path) -> Path:
+    output_dir.mkdir(parents=True, exist_ok=True)
+    stem = Path(result.source_filename).stem
+    output_path = output_dir / f"{stem}_result.md"
+
+    lines = [f"# Parse Result: {result.source_filename}\n"]
+    for el in result.elements:
+        lines.append(f"## [{el.category}] Page {el.page}")
+        lines.append(el.content)
+        lines.append("\n---\n")
+
+    output_path.write_text("\n".join(lines), encoding="utf-8")
     return output_path

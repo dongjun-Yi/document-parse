@@ -7,9 +7,6 @@ import os
 
 load_dotenv()
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
 
 _DEFAULT_OUTPUT_DIR = "outputs"
 _DEFAULT_MODEL = "document-parse"
@@ -17,14 +14,8 @@ _VALID_OCR_VALUES = ("auto", "force", "off")
 _VALID_OUTPUT_FORMATS = ("html", "text", "markdown")
 
 
-# ---------------------------------------------------------------------------
-# Data classes
-# ---------------------------------------------------------------------------
-
-
 @dataclass
 class ParseOptions:
-    """Upstage Document Parse API options."""
 
     model: str = _DEFAULT_MODEL
     ocr: Literal["auto", "force", "off"] = "auto"
@@ -36,24 +27,13 @@ class ParseOptions:
 
 @dataclass
 class AppSettings:
-    """Application-wide settings loaded from environment variables."""
 
     api_key: str
     output_dir: Path
     parse_options: ParseOptions
 
 
-# ---------------------------------------------------------------------------
-# Loader
-# ---------------------------------------------------------------------------
-
-
 def load_settings(parse_options: ParseOptions | None = None) -> AppSettings:
-    """Load and validate application settings from environment variables.
-
-    Raises:
-        EnvironmentError: If UPSTAGE_API_KEY is not set.
-    """
     api_key = os.getenv("UPSTAGE_API_KEY", "")
     if not api_key:
         raise EnvironmentError(

@@ -9,25 +9,11 @@ import requests
 from src.config.settings import ParseOptions
 
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-
 _UPSTAGE_API_URL = "https://api.upstage.ai/v1/document-digitization"
-_REQUEST_TIMEOUT_SECONDS = 300
-
-
-# ---------------------------------------------------------------------------
-# UpstageApiClient
-# ---------------------------------------------------------------------------
+_REQUEST_TIMEOUT_SECONDS = 30
 
 
 class UpstageApiClient:
-    """Thin wrapper around the Upstage Document Parse REST API.
-
-    Uses the requests library directly instead of langchain_upstage
-    for compatibility with Python 3.14+.
-    """
 
     def __init__(self, api_key: str, options: ParseOptions) -> None:
         self._api_key = api_key
@@ -57,17 +43,14 @@ class UpstageApiClient:
         raw_elements = self._extract_elements(response)
         return raw_elements, elapsed
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
     def _call_api(self, file_path: Path) -> dict[str, Any]:
-        """Send the document to the Upstage API and return the JSON response."""
         headers = {"Authorization": f"Bearer {self._api_key}"}
         data = self._build_request_payload()
 
         with open(file_path, "rb") as document_file:
-            files = {"document": (file_path.name, document_file, "application/octet-stream")}
+            files = {
+                "document": (file_path.name, document_file, "application/octet-stream")
+            }
             response = requests.post(
                 _UPSTAGE_API_URL,
                 headers=headers,
@@ -84,7 +67,6 @@ class UpstageApiClient:
         return response.json()
 
     def _build_request_payload(self) -> dict[str, Any]:
-        """Build the form-data payload from ParseOptions."""
         opts = self._options
         payload: dict[str, Any] = {
             "model": opts.model,
@@ -99,7 +81,6 @@ class UpstageApiClient:
 
     @staticmethod
     def _extract_elements(response: dict[str, Any]) -> list[dict[str, Any]]:
-        """Extract parsed elements from the API response."""
         elements: list[dict[str, Any]] = response.get("elements", [])
         return [
             {

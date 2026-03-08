@@ -7,15 +7,10 @@ from src.config.settings import AppSettings
 from src.models.parse_result import ParsedElement, ParseResult
 from src.parser.upstage_client import UpstageApiClient
 
-# Categories considered as image-type elements
 _IMAGE_CATEGORIES = {"figure", "chart"}
 
 
 class DocumentParser:
-    """Orchestrates document parsing: calls the API, maps results to domain models.
-
-    Single responsibility: coordinate UpstageApiClient and ParseResult creation.
-    """
 
     def __init__(self, settings: AppSettings) -> None:
         self._client = UpstageApiClient(
@@ -24,14 +19,6 @@ class DocumentParser:
         )
 
     def parse(self, file_path: Path) -> ParseResult:
-        """Parse a document and return a structured ParseResult.
-
-        Args:
-            file_path: Path to the document file.
-
-        Returns:
-            ParseResult containing all extracted elements.
-        """
         raw_elements, elapsed = self._client.parse_document(file_path)
 
         elements = [self._map_to_element(raw) for raw in raw_elements]
@@ -44,13 +31,8 @@ class DocumentParser:
             raw_output=raw_output,
         )
 
-    # ------------------------------------------------------------------
-    # Private helpers
-    # ------------------------------------------------------------------
-
     @staticmethod
     def _map_to_element(raw: dict[str, Any]) -> ParsedElement:
-        """Map a raw API response dict to a ParsedElement domain object."""
         return ParsedElement(
             category=raw.get("category", "unknown"),
             content=raw.get("content", ""),
@@ -65,5 +47,4 @@ class DocumentParser:
 
     @staticmethod
     def _build_raw_output(raw_elements: list[dict[str, Any]]) -> str:
-        """Concatenate all content fields into a single raw output string."""
         return "\n".join(el.get("content", "") for el in raw_elements)

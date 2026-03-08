@@ -7,23 +7,23 @@ from html.parser import HTMLParser
 from src.models.parse_result import ParsedElement, ParseResult
 
 
-# ---------------------------------------------------------------------------
-# Constants
-# ---------------------------------------------------------------------------
-
 _TABLE_CATEGORIES = {"table"}
 _FIGURE_CATEGORIES = {"figure", "chart"}
-_TEXT_CATEGORIES = {"paragraph", "heading", "heading1", "heading2", "heading3",
-                    "header", "footer", "caption", "list", "list-item"}
-
-
-# ---------------------------------------------------------------------------
-# HTML helpers
-# ---------------------------------------------------------------------------
+_TEXT_CATEGORIES = {
+    "paragraph",
+    "heading",
+    "heading1",
+    "heading2",
+    "heading3",
+    "header",
+    "footer",
+    "caption",
+    "list",
+    "list-item",
+}
 
 
 class _TableTagDetector(HTMLParser):
-    """Check whether an HTML string contains a <td> tag."""
 
     def __init__(self) -> None:
         super().__init__()
@@ -35,20 +35,13 @@ class _TableTagDetector(HTMLParser):
 
 
 def _has_valid_table_structure(html: str) -> bool:
-    """Return True if the HTML contains at least one <td> element."""
     detector = _TableTagDetector()
     detector.feed(html)
     return detector.has_td
 
 
-# ---------------------------------------------------------------------------
-# Result data class
-# ---------------------------------------------------------------------------
-
-
 @dataclass
 class QualityReport:
-    """Summary statistics focused on three extraction quality metrics."""
 
     source_filename: str
     total_elements: int
@@ -69,32 +62,18 @@ class QualityReport:
 
     @property
     def table_success_rate(self) -> float:
-        """Ratio of tables with valid <td> structure."""
         if self.table_total == 0:
             return 0.0
         return self.table_valid / self.table_total
 
     @property
     def figure_base64_rate(self) -> float:
-        """Ratio of figures that contain base64-encoded image data."""
         if self.figure_total == 0:
             return 0.0
         return self.figure_with_base64 / self.figure_total
 
 
-# ---------------------------------------------------------------------------
-# Analyzer
-# ---------------------------------------------------------------------------
-
-
 def analyze(result: ParseResult) -> QualityReport:
-    """Compute three quality metrics from a ParseResult.
-
-    Metrics:
-        1. Element distribution ratio (category percentages)
-        2. Table extraction success rate (<td> structure validity)
-        3. Figure base64 extraction rate (presence of base64_encoding)
-    """
     category_counts = dict(Counter(el.category for el in result.elements))
     total = result.total_element_count
 
@@ -104,14 +83,14 @@ def analyze(result: ParseResult) -> QualityReport:
     }
 
     table_elements = [el for el in result.elements if el.category in _TABLE_CATEGORIES]
-    figure_elements = [el for el in result.elements if el.category in _FIGURE_CATEGORIES]
+    figure_elements = [
+        el for el in result.elements if el.category in _FIGURE_CATEGORIES
+    ]
 
     table_valid = sum(
         1 for el in table_elements if _has_valid_table_structure(el.content)
     )
-    figure_with_base64 = sum(
-        1 for el in figure_elements if _element_has_base64(el)
-    )
+    figure_with_base64 = sum(1 for el in figure_elements if _element_has_base64(el))
 
     return QualityReport(
         source_filename=result.source_filename,
@@ -128,6 +107,5 @@ def analyze(result: ParseResult) -> QualityReport:
 
 
 def _element_has_base64(element: ParsedElement) -> bool:
-    """Return True if the element's metadata contains a non-empty base64_encoding."""
     base64_value = element.metadata.get("base64_encoding", "")
     return bool(base64_value)
